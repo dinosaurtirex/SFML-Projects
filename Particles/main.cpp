@@ -6,11 +6,15 @@
 
 using namespace std;
 
-const int WINDOW_X = 800;
-const int WINDOW_Y = 800;
+const int WINDOW_X = 1920;
+const int WINDOW_Y = 1080;
 
 const int randInt(const int min, const int max) {
     return min + (rand() % static_cast<int>(max - min + 1));
+}
+
+const float randFloat(const float min, const float max) {
+    return min + static_cast<float>(rand()) / static_cast<float>(RAND_MAX / (max - min));
 }
 
 
@@ -24,20 +28,36 @@ public:
     }
 
     void addParticle(int x, int y) {
-        particles.append(sf::Vertex(sf::Vector2f(x, y)));
+        const int randomInteger = randInt(1, 4);
+        if (randomInteger == 1) {
+            for (int i = 0; i < 3; i++) {
+                particles.append(sf::Vertex(sf::Vector2f(x, y), sf::Color::Red, sf::Vector2f(25.f, 25.f)));
+            }
+        }
+        if (randomInteger == 2) {
+            for (int i = 0; i < 15; i++) {
+                particles.append(sf::Vertex(sf::Vector2f(x, y), sf::Color::White));
+            }
+        }
+        if (randomInteger == 2) {
+            for (int i = 0; i < 3; i++) {
+                particles.append(sf::Vertex(sf::Vector2f(x, y), sf::Color::Green));
+            }
+        }
+        particles.append(sf::Vertex(sf::Vector2f(x, y), sf::Color::White));
     }
 
     void fillParticles(int count) {
         for (int i = 0; i < count; i++) {
-            const int x = randInt(0, WINDOW_X - 50);
+            const int x = randInt(0, WINDOW_X);
             const int y = randInt(0, WINDOW_Y - 50);
             addParticle(x, y);
         }
     };
 
-    void addGravityEffect() {
+    void addGravityEffect(float gravityConstant) {
         for (int i = 0; i < particles.getVertexCount(); i++) {
-            float calculatedY = particles[i].position.y + 9.8f;
+            float calculatedY = particles[i].position.y + gravityConstant;
             if (calculatedY > (static_cast<float>(WINDOW_Y)) - 20.f) {
                 continue;
             }
@@ -50,8 +70,8 @@ public:
     void addNoise(float noiseConstant) {
         float fnoiseConstant = noiseConstant;
         for (int i = 0; i < particles.getVertexCount(); i++) {
-            particles[i].position.x = randInt(particles[i].position.x - fnoiseConstant, particles[i].position.x + fnoiseConstant);
-            particles[i].position.y = randInt(particles[i].position.y - fnoiseConstant, particles[i].position.y + fnoiseConstant);
+            particles[i].position.x = randFloat(particles[i].position.x - fnoiseConstant, particles[i].position.x + fnoiseConstant);
+            particles[i].position.y = randFloat(particles[i].position.y - fnoiseConstant, particles[i].position.y + fnoiseConstant);
         }
     }
 
@@ -84,7 +104,7 @@ int main()
 
     ParticleSystem particleSystem;
 
-    particleSystem.fillParticles(250);
+    particleSystem.fillParticles(550);
 
     int lastCursorX = WINDOW_X / 2;
     int lastCursorY = WINDOW_Y / 2;
@@ -117,8 +137,8 @@ int main()
         if (accumulatedTime >= 0.016f) { // 60 fps 
             //particleSystem.moveAllParticlesTo(lastCursorX, lastCursorY, 1.f, 1.f);
             accumulatedTime = 0.0f;
-            particleSystem.addGravityEffect();
-            particleSystem.addNoise(1.f);
+            particleSystem.addGravityEffect(0.f);
+            particleSystem.addNoise(0.01f);
         }
         window.draw(particleSystem.getParticles());
         window.display();
